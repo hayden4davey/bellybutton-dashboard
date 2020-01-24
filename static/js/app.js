@@ -12,21 +12,18 @@ function init(){
         console.log(data);
         data.names.map((name) => {
             dropdown.append("option").text(name).property("value");
-        var idInit = data.names[0];
-        //runBelly(idInit);
-        })
-    
-    })
 
-    
-    
+        // Run plotting function for first id
+        var idInit = data.names[0];
+        runBelly(idInit);
+        })
+    })   
 }
 
-// Change function
+// Function triggered by change
 function optionChanged(id){
     console.log(id);
     runBelly(id);
-
 }
 
 
@@ -38,34 +35,31 @@ function runBelly(id){
         var index = data.names.indexOf(id)
         var sampleValues = data.samples[index].sample_values;
         var otuIDs = data.samples[index].otu_ids;
-        var otuLabels = data.samples[index].otu_ids;
+        var otuLabels = data.samples[index].otu_labels;
         var sampleMeta = data.metadata[index];
-        console.log(sampleValues);
-        console.log(otuIDs);
-        console.log(otuLabels);
-        console.log(sampleMeta);
-        console.log(id);
+        var washFreq = data.metadata[index].wfreq;
+        console.log(washFreq);
 
-
-
+        // Set data for bar plot
         var barData =[{
             type: 'bar',
             x: sampleValues.sort((a, b) => b - a).slice(0,10),
             y: otuIDs.map((x) => "OTD" + x),
             text: otuLabels,
-            orientation: 'h'    
-
-
+            orientation: 'h' ,
+            marker: {color: '#337AB7'}   
         }];
-
-        var layout = {
-            yaxis:{
-                autorange:'reversed'
-            }
+        
+        // Set up layout for bar
+        var barLayout = {
+            yaxis: {autorange:'reversed'},
+            title: {text: "Top OTUs Found"}
         };
 
-        Plotly.newPlot('bar', barData, layout);
+        // Plot bar
+        Plotly.newPlot('bar', barData, barLayout);
 
+        // Set data for bubble plot
         var bubbleData = [{
             x: otuIDs,
             y: sampleValues,
@@ -76,29 +70,50 @@ function runBelly(id){
             },
             text: otuLabels
         }];
-          
-        Plotly.newPlot('bubble', bubbleData);
 
-        sampleSpace = d3.select("#sample-metadata");
-        sampleSpace.text("")
-        Object.entries(sampleMeta).forEach((x) => {
-            sampleSpace.append("h5").text(x[0] + ": " + x[1] + "\n")
-        })
+        // Set up layout for bubble
+        var bubbleLayout = {
+            title: {text: "Sample Distribution"}
+        };
+         
+        // Plot bubble
+        Plotly.newPlot('bubble', bubbleData, bubbleLayout);
+
+        // Set Data for gauge
+        var gaugeData = [{
+              domain: {x: [0, 1], y: [0, 1]},
+              value: washFreq,
+              title: {text: "Washing Frequency <br> Scrubs per Week"},
+              type: "indicator",
+              mode: "gauge+number+delta",
+              gauge: {
+                bar: {color: '#337AB7'},
+                axis: {range: [null, 10]},
+                steps: [
+                  { range: [0, 2], color: "white" },
+                  { range: [2, 4], color: "#EEEEEE" },
+                  { range: [4, 6], color: "#CCCCCC" },
+                  { range: [6, 8], color: "#999999" },
+                  { range: [8, 10], color: "#666666" }
+                ],
+              }
+            }];
         
+        // Plot gauge
+        Plotly.newPlot('gauge', gaugeData);
 
-    })
+        // Select demographic space and set as blank
+        sampleSpace = d3.select("#sample-metadata");
+        sampleSpace.text("");
 
-    
-
-
-
-
-   
-    
-    
+        // Loop through dictionary and append text on new lines
+        Object.entries(sampleMeta).forEach((p) => {
+            sampleSpace.append("h5").text(p[0] + ": " + p[1] + "\n")
+        });
+    })    
 }
 
-
-
-
+// Run init function
 init();
+
+
