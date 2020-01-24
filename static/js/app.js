@@ -1,9 +1,6 @@
 // Assign variable to json file
 var sampleData = "../../samples.json";
 
-// Select dropdown
-var dropdown = d3.select("#selDataset");
-
 // Create init function
 function init(){
 
@@ -15,8 +12,13 @@ function init(){
         console.log(data);
         data.names.map((name) => {
             dropdown.append("option").text(name).property("value");
+        var idInit = data.names[0];
+        //runBelly(idInit);
         })
+    
     })
+
+    
     
 }
 
@@ -33,28 +35,36 @@ function runBelly(id){
     
     // Read and save data
     d3.json(sampleData).then((data)=>{
-        var sampleValues = data.samples.find(x => x.id).sample_values;
-        var otuIDs = data.samples.find(x => x.id === id).otu_ids;
-        var otuLabels = data.samples.find(x => x.id).otu_labels;
-        var metadata = data.metadata.find(x => x.id)
+        var index = data.names.indexOf(id)
+        var sampleValues = data.samples[index].sample_values;
+        var otuIDs = data.samples[index].otu_ids;
+        var otuLabels = data.samples[index].otu_ids;
+        var sampleMeta = data.metadata[index];
         console.log(sampleValues);
         console.log(otuIDs);
         console.log(otuLabels);
-        console.log(metadata);
+        console.log(sampleMeta);
+        console.log(id);
 
 
 
         var barData =[{
             type: 'bar',
-            x: sampleValues.slice(0,10).reverse(),
-            y: otuIDs,
+            x: sampleValues.sort((a, b) => b - a).slice(0,10),
+            y: otuIDs.map((x) => "OTD" + x),
             text: otuLabels,
             orientation: 'h'    
 
 
         }];
 
-        Plotly.newPlot('bar', barData);
+        var layout = {
+            yaxis:{
+                autorange:'reversed'
+            }
+        };
+
+        Plotly.newPlot('bar', barData, layout);
 
         var bubbleData = [{
             x: otuIDs,
@@ -65,9 +75,16 @@ function runBelly(id){
                 color: otuIDs
             },
             text: otuLabels
-          }];
+        }];
           
-          Plotly.newPlot('bubble', bubbleData);
+        Plotly.newPlot('bubble', bubbleData);
+
+        sampleSpace = d3.select("#sample-metadata");
+        sampleSpace.text("")
+        Object.entries(sampleMeta).forEach((x) => {
+            sampleSpace.append("h5").text(x[0] + ": " + x[1] + "\n")
+        })
+        
 
     })
 
