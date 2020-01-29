@@ -1,5 +1,8 @@
 // Assign variable to json file
-var sampleData = "samples.json";
+var sampleData = "https://hayden4davey.github.io/plotly-challenge/samples.json";
+
+// To run off hard drive with VS Code, use this code instead:
+//var sampleData = "samples.json"
 
 // Create init function
 function init(){
