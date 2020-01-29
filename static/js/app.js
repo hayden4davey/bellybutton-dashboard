@@ -1,5 +1,5 @@
 // Assign variable to json file
-var sampleData = "../samples.json";
+var sampleData = "samples.json";
 
 // Create init function
 function init(){
